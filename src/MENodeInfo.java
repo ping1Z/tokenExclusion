@@ -5,5 +5,4 @@ public class MENodeInfo {
     private int id;
     private String host;
     private int port;
-    private String content;
 }
