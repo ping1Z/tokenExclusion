@@ -1,0 +1,16 @@
+
+# nodesNum interRequestDelayMean csExecutionTimeMean requestsNum
+  5        10                    15                  100
+
+# Here we list the individual nodes
+
+#
+# Format is:
+
+# NodeId Hostname Port  Holeder
+  0      dc01     2345  0  
+  1      dc01     2346  0
+  2      dc01     2347  0
+  3      dc01     2348  1
+  4      dc01     2349  1
+
