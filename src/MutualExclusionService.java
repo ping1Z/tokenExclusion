@@ -1,10 +1,5 @@
-import java.net.ServerSocket;
 import java.util.LinkedList;
-import java.io.*;
 
-/**
- * Created by ping1zhong on 7/17/17.
- */
 public class MutualExclusionService{
 
     private MENodeInfo local;

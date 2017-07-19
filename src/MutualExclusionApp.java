@@ -1,9 +1,6 @@
 import java.io.*;
 import java.util.Random;
 
-/**
- * Created by ping1zhong on 7/17/17.
- */
 public class MutualExclusionApp {
     private int nodesNum = 0;
     private int interRequestDelayMean;

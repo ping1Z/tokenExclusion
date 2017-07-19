@@ -4,9 +4,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by ping1zhong on 7/17/17.
- */
 public class MEServerThread extends Thread{;
     private int port;
     private List<MEServerEventListener> listeners;
