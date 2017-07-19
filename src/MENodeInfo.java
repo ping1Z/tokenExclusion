@@ -1,17 +1,12 @@
-/**
- * Created by ping1zhong on 7/17/17.
- */
 public class MENodeInfo {
     private int id;
     private String host;
     private int port;
-    private int holderId;
 
-    public MENodeInfo(int id, String host, int port, int holderId) {
+    public MENodeInfo(int id, String host, int port) {
         this.id = id;
         this.host = host;
         this.port = port;
-        this.holderId = holderId;
     }
 
     public int getId() {
@@ -24,9 +19,5 @@ public class MENodeInfo {
 
     public int getPort() {
         return port;
-    }
-
-    public int getHolderId() {
-        return holderId;
     }
 }
