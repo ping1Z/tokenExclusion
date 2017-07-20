@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashMap;
 import java.util.Random;
 
 public class MutualExclusionApp {
@@ -10,19 +11,19 @@ public class MutualExclusionApp {
     private MutualExclusionService meService;
     private MENodeInfo local;
     private MENodeInfo holder;
+    private HashMap<Integer, MENodeInfo> neighbours = new HashMap<>();
 
     public static void main(String[] args) {
-        String configPath = args.length>0? args[0]: "../configs";
+        String configPath = args.length>0? args[0]: "../config.txt";
         int localId = args.length>1? Integer.parseInt((args[1])):1;
         String logPath = args.length>2?(args[2]):"./logs";
 
         MELogger.Init(logPath +"/node_"+ localId+".log");
         MELogger.Info("Init node......");
 
-
         MutualExclusionApp meApp = new MutualExclusionApp();
         meApp.readConfig(configPath, localId);
-        meApp.meService = new MutualExclusionService(meApp.local, meApp.holder);
+        meApp.meService = new MutualExclusionService(meApp.local, meApp.holder, meApp.neighbours);
         meApp.meService.start();
 
         MELogger.Info("MutualExclusionService is started.");
@@ -40,6 +41,7 @@ public class MutualExclusionApp {
         InputStreamReader isr;
         try
         {
+            int myHolderId = 0;
             isr = new InputStreamReader(new FileInputStream(file));
             BufferedReader br = new BufferedReader(isr);
             String line;
@@ -61,11 +63,12 @@ public class MutualExclusionApp {
                             int nodePort = Integer.parseInt(token[2]);
                             int holderId = Integer.parseInt(token[3]);
                             local = new MENodeInfo(nodeId, nodeHost, nodePort);
+                            myHolderId = holderId;
 
                             br.close();
                             isr.close();
 
-                            // read config of holder
+                            // read config of neighbours
                             isr = new InputStreamReader(new FileInputStream(file));
                             br = new BufferedReader(isr);
                             int validLine = 0;
@@ -76,9 +79,12 @@ public class MutualExclusionApp {
                                     if (validLine == 0) validLine++;
                                     else {
                                         token = realLine.split("\\s+");
-                                        if (holderId == Integer.parseInt(token[0])) {
-                                            holder = new MENodeInfo(Integer.parseInt(token[0]), token[1], Integer.parseInt(token[2]));
-                                            break;
+                                        nodeId = Integer.parseInt(token[0]);
+                                        nodeHost = token[1];
+                                        nodePort = Integer.parseInt(token[2]);
+                                        holderId = Integer.parseInt(token[3]);
+                                        if (nodeId == myHolderId || localId == holderId) {
+                                            neighbours.put(nodeId, new MENodeInfo(nodeId, nodeHost, nodePort));
                                         }
                                     }
                                 }
@@ -88,6 +94,7 @@ public class MutualExclusionApp {
                     }
                 }
             }
+            holder = myHolderId == localId ? local : neighbours.get(myHolderId);
             br.close();
             isr.close();
         } catch(IOException ex) {
@@ -105,6 +112,13 @@ public class MutualExclusionApp {
         while (requestsNum > 0) {
             MELogger.Info("Try to enter CRITICAL SECTION.");
             meService.csEnter();
+            while (!meService.inCS) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
             try {
                 Thread.sleep(getNext(randCS, csExecutionTimeMean));
             } catch (InterruptedException ex) {
