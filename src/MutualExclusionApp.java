@@ -27,7 +27,11 @@ public class MutualExclusionApp {
         meApp.meService.start();
 
         MELogger.Info("MutualExclusionService is started.");
+        try{
+            Thread.sleep(10000);
+        }catch (InterruptedException i) {
 
+        }
         meApp.start();
 
         MELogger.Info("MutualExclusionApp is Started.");
@@ -119,6 +123,7 @@ public class MutualExclusionApp {
                     ex.printStackTrace();
                 }
             }
+            MELogger.Info("TimeStamp is %d, enter the CRITICAL SECTION.", meService.getTimeStamp());
             try {
                 Thread.sleep(getNext(randCS, csExecutionTimeMean));
             } catch (InterruptedException ex) {

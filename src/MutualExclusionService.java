@@ -13,7 +13,13 @@ public class MutualExclusionService{
     public boolean inCS = false;
     private HashMap<Integer, MENodeInfo> neighbours;
     private LinkedList<Integer> queue = new LinkedList<>();
-
+    private int timeStamp;
+    public int getTimeStamp(){
+        return timeStamp;
+    }
+    public void setTimeStamp(int timeStamp){
+        this.timeStamp = timeStamp;
+    }
     private MEServerThread server;
 
     public MutualExclusionService(MENodeInfo local, MENodeInfo holder, HashMap<Integer, MENodeInfo> neighbours) {
@@ -73,6 +79,7 @@ public class MutualExclusionService{
         if (msg.getContent().equals("REQUEST")) {
             queue.add(msg.getId());
         } else {
+            setTimeStamp(msg.getTimeStamp());
             holder = local;
         }
         assignToken();
@@ -88,6 +95,7 @@ public class MutualExclusionService{
 
     public void csLeave() {
         inCS = false;
+        setTimeStamp(getTimeStamp() + 1);
         assignToken();
         makeRequest();
     }
@@ -95,7 +103,7 @@ public class MutualExclusionService{
     private void sendRequest() {
         try
         {
-            String msg = "REQUEST|" + local.getId();
+            String msg = "REQUEST|" + local.getId() + "|" + getTimeStamp();
             Socket clientSocket = new Socket(holder.getHost(), holder.getPort());
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             out.write(msg);
@@ -111,7 +119,7 @@ public class MutualExclusionService{
     private void sendToken(int requestId) {
         try
         {
-            String msg = "TOKEN|" + local.getId();
+            String msg = "TOKEN|" + local.getId() + "|" + getTimeStamp();
             MENodeInfo sendTo = neighbours.get(requestId);
             Socket clientSocket = new Socket(sendTo.getHost(), sendTo.getPort());
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));

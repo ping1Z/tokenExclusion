@@ -15,7 +15,7 @@ public class MEServerThread extends Thread{;
 
     public void registerEventListenser(MEServerEventListener listener) {
         if(listeners == null) {
-            listeners = new ArrayList<MEServerEventListener>();
+            listeners = new ArrayList<>();
         }
         listeners.add(listener);
     }
