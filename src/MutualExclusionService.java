@@ -11,9 +11,6 @@ public class MutualExclusionService{
     private MENodeInfo local;
     private MENodeInfo holder;
     private MEStatus status = MEStatus.CLOSE;
-    //private boolean isRunning = false;
-    //private boolean asked = false;
-    //public boolean inCS = false;
     private HashMap<Integer, MENodeInfo> neighbours;
     private LinkedList<Integer> queue = new LinkedList<>();
     private int timeStamp;
