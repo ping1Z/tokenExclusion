@@ -14,40 +14,58 @@ public class MutualExclusionApp {
     private HashMap<Integer, MENodeInfo> neighbours = new HashMap<>();
 
     public static void main(String[] args) {
-        String configPath = args.length>0? args[0]: "../config.txt";
-        int localId = args.length>1? Integer.parseInt((args[1])):1;
-        String logPath = args.length>2?(args[2]):"./logs";
 
-        MELogger.Init(logPath +"/node_"+ localId+".log");
-        MELogger.Info("Init node......");
+        try {
+            String configPath = args.length > 0 ? args[0] : "../config.txt";
+            int localId = args.length > 1 ? Integer.parseInt((args[1])) : 1;
+            String logPath = args.length > 2 ? (args[2]) : "./logs";
 
-        MutualExclusionApp meApp = new MutualExclusionApp();
-        meApp.readConfig(configPath, localId);
-        meApp.meService = new MutualExclusionService(meApp.local, meApp.holder, meApp.neighbours);
-        meApp.meService.start();
+            MELogger.Init(logPath + "/node_" + localId + ".log");
+            MELogger.Info("Init node......");
 
-        MELogger.Info("MutualExclusionService is started.");
-        try{
-            Thread.sleep(10000);
-        }catch (InterruptedException i) {
+            MutualExclusionApp meApp = new MutualExclusionApp();
+            meApp.readConfig(configPath, localId);
+            meApp.meService = new MutualExclusionService(meApp.local, meApp.holder, meApp.neighbours);
+            meApp.meService.start();
 
+            MELogger.Info("MutualExclusionService is started.");
+
+            int count = 5;
+            while(count>0){
+                MELogger.Info("%d seconds to start.",count);
+                Thread.sleep(1000);
+                count--;
+            }
+
+            while(!meApp.meService.isRunning()){
+                Thread.sleep(1000);
+            }
+
+            MELogger.Info("MutualExclusionApp is Started.");
+
+            meApp.start();
+
+
+
+        }catch (Exception e){
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            MELogger.Error(sw.toString());
         }
-        meApp.start();
-
-        MELogger.Info("MutualExclusionApp is Started.");
     }
 
-    private void readConfig(String fileName, int localId) {
+    private void readConfig(String fileName, int localId) throws Exception {
         File file = new File(fileName);
         if (!file.exists()) {
             System.out.println("No File Found " + fileName);
         }
-        InputStreamReader isr;
-        try
-        {
+        InputStreamReader isr = null;
+        BufferedReader br = null;
+        try {
             int myHolderId = 0;
             isr = new InputStreamReader(new FileInputStream(file));
-            BufferedReader br = new BufferedReader(isr);
+            br = new BufferedReader(isr);
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -99,11 +117,19 @@ public class MutualExclusionApp {
                 }
             }
             holder = myHolderId == localId ? local : neighbours.get(myHolderId);
-            br.close();
-            isr.close();
-        } catch(IOException ex) {
-            ex.printStackTrace();
+
+        }catch (Exception e){
+            throw e;
+
+        }finally {
+            if(br !=null){
+                br.close();
+            }
+            if(isr !=null) {
+                isr.close();
+            }
         }
+
     }
 
     private boolean isValidLine(String line) {
@@ -111,32 +137,30 @@ public class MutualExclusionApp {
     }
 
     private void start() {
-        Random randCS = new Random();
-        Random randWait = new Random();
-        while (requestsNum > 0) {
-            MELogger.Info("Try to enter CRITICAL SECTION.");
-            meService.csEnter();
-            while (!meService.inCS) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-            MELogger.Info("TimeStamp is %d, enter the CRITICAL SECTION.", meService.getTimeStamp());
-            try {
+
+        try {
+            Random randCS = new Random();
+            Random randWait = new Random();
+            while (requestsNum > 0) {
+                MELogger.Info("Try to enter CRITICAL SECTION.");
+                meService.csEnter();
+
+                MELogger.Info("TimeStamp is %d, enter the CRITICAL SECTION.", meService.getTimeStamp());
+
                 Thread.sleep(getNext(randCS, csExecutionTimeMean));
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-            meService.csLeave();
-            MELogger.Info("Leave CRITICAL SECTION.");
-            try {
+
+                meService.csLeave();
+                MELogger.Info("Leave CRITICAL SECTION.");
+
                 Thread.sleep(getNext(randWait, interRequestDelayMean));
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+
+                requestsNum--;
             }
-            requestsNum--;
+        }catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            MELogger.Error(sw.toString());
         }
     }
 

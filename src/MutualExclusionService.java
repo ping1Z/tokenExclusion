@@ -1,5 +1,6 @@
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashMap;
@@ -9,8 +10,10 @@ public class MutualExclusionService{
 
     private MENodeInfo local;
     private MENodeInfo holder;
-    private boolean ASKED = false;
-    public boolean inCS = false;
+    private MEStatus status = MEStatus.CLOSE;
+    //private boolean isRunning = false;
+    //private boolean asked = false;
+    //public boolean inCS = false;
     private HashMap<Integer, MENodeInfo> neighbours;
     private LinkedList<Integer> queue = new LinkedList<>();
     private int timeStamp;
@@ -32,6 +35,9 @@ public class MutualExclusionService{
         startServer();
     }
 
+    public boolean isRunning(){
+        return status != MEStatus.CLOSE;
+    }
     public  void startServer() {
         if(this.server != null) {
             MELogger.Info("MEServer is running already.");
@@ -44,6 +50,7 @@ public class MutualExclusionService{
             @Override
             public void postServerStarted() {
                 MELogger.Info("postServerStarted");
+                status = MEStatus.IDLE;
             }
 
             @Override
@@ -56,23 +63,33 @@ public class MutualExclusionService{
         this.server.start();
     }
     private void makeRequest() {
-        if (holder.getId() != local.getId() && !queue.isEmpty() && !ASKED) {
-            sendRequest();
-            ASKED = true;
+        if(holder.getId() == local.getId() || status == MEStatus.ASKED || queue.isEmpty()){
+            return;
         }
+        sendRequest();
+        switchStatus(MEStatus.ASKED);
     }
 
     private void assignToken() {
-        if (holder.getId() == local.getId() && !inCS && !queue.isEmpty()) {
-            int requestId = queue.poll();
-            if (requestId != local.getId()) {
-                sendToken(requestId);
-                holder = neighbours.get(requestId);
-                ASKED = false;
-            } else {
-                inCS = true;
-            }
+        if(holder.getId() != local.getId()){
+            return;
         }
+
+        if(status == MEStatus.IN_CS || queue.isEmpty()){
+            return;
+        }
+
+        int requestId = queue.poll();
+
+        if (requestId == local.getId()){
+            status = MEStatus.IN_CS;
+            return;
+        }
+
+        sendToken(requestId);
+        holder = neighbours.get(requestId);
+        switchStatus(MEStatus.IDLE);
+
     }
 
     public void processMsg(MEMsg msg) {
@@ -86,16 +103,30 @@ public class MutualExclusionService{
         makeRequest();
     }
 
-    public void csEnter() {
+    public void csEnter() throws Exception{
         MELogger.Info("Request %d", local.getId());
-        queue.add(local.getId());
-        assignToken();
-        makeRequest();
+
+        queue.addFirst(local.getId());
+
+        if(status != MEStatus.ASKED){
+            makeRequest();
+            switchStatus(MEStatus.ASKED);
+        }
+
+        while(status != MEStatus.IN_CS){
+
+            assignToken();
+            Thread.sleep(10);
+        }
+    }
+
+    public synchronized void switchStatus(MEStatus to){
+        this.status = to;
     }
 
     public void csLeave() {
-        inCS = false;
         setTimeStamp(getTimeStamp() + 1);
+        switchStatus(MEStatus.IDLE);
         assignToken();
         makeRequest();
     }
