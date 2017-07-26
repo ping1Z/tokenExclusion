@@ -141,7 +141,8 @@ public class MutualExclusionApp {
         try {
             Random randCS = new Random();
             Random randWait = new Random();
-            // to calculate system throughput
+
+            int totalCSNum = nodesNum * requestsNum;
             long appStart = System.currentTimeMillis();
             while (requestsNum > 0) {
                 MELogger.Info("Try to enter CRITICAL SECTION.");
@@ -162,15 +163,20 @@ public class MutualExclusionApp {
                 MELogger.Debug("[ME_REPORT_EXECUTION] %d %d %d", local.getId(), requestsNum, System.currentTimeMillis() - executionStart);
 
                 meService.csLeave();
+
+
                 MELogger.Debug("[ME_REPORT_RESPONSE] %d %d %d", local.getId(), requestsNum, System.currentTimeMillis() - repsonseStart);
                 MELogger.Info("Leave CRITICAL SECTION.");
 
                 Thread.sleep(getNext(randWait, interRequestDelayMean));
 
                 requestsNum--;
+
+                if(meService.getTimeStamp() >= totalCSNum){
+                    MELogger.Debug("[ME_REPORT_APP] %d %d", local.getId(), System.currentTimeMillis() - appStart);
+                }
             }
-            // to calculate system throughput
-            MELogger.Debug("[ME_REPORT_APP] %d %d", local.getId(), System.currentTimeMillis() - appStart);
+
         }catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);

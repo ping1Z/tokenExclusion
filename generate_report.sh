@@ -37,12 +37,11 @@ echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_APP' $LOGDIR/*.log |
 (
     READ_NODE=0
-    while read line 
+    while read line
     do
-    
 	id=$( echo $line | awk '{ print $5 }' )
     time=$( echo $line | awk '{ print $6 }' )
-	
+
 	echo $id, $time >> $REPORT_NAME
     done 
 )  
