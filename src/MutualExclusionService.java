@@ -59,7 +59,7 @@ public class MutualExclusionService{
 
         this.server.start();
     }
-    private void makeRequest() {
+    private synchronized void makeRequest() {
         if(holder.getId() == local.getId() || status == MEStatus.ASKED || queue.isEmpty()){
             return;
         }
@@ -67,7 +67,7 @@ public class MutualExclusionService{
         switchStatus(MEStatus.ASKED);
     }
 
-    private void assignToken() {
+    private synchronized void assignToken() {
         if(holder.getId() != local.getId()){
             return;
         }
@@ -90,6 +90,9 @@ public class MutualExclusionService{
     }
 
     public void processMsg(MEMsg msg) {
+        // to calculate message complexity
+        MELogger.Debug("[ME_REPORT_MSG] %d %s", msg.getId(), msg.getContent());
+
         if (msg.getContent().equals("REQUEST")) {
             queue.add(msg.getId());
         } else {
@@ -105,14 +108,11 @@ public class MutualExclusionService{
 
         queue.addFirst(local.getId());
 
-        if(status != MEStatus.ASKED){
-            makeRequest();
-            switchStatus(MEStatus.ASKED);
-        }
+        assignToken();
+        makeRequest();
 
         while(status != MEStatus.IN_CS){
 
-            assignToken();
             Thread.sleep(10);
         }
     }

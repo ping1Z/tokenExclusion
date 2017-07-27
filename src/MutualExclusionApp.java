@@ -141,21 +141,42 @@ public class MutualExclusionApp {
         try {
             Random randCS = new Random();
             Random randWait = new Random();
+
+            int totalCSNum = nodesNum * requestsNum;
+            long appStart = System.currentTimeMillis();
             while (requestsNum > 0) {
                 MELogger.Info("Try to enter CRITICAL SECTION.");
+                // to calculate response time
+                long repsonseStart = System.currentTimeMillis();
+
                 meService.csEnter();
 
-                MELogger.Info("TimeStamp is %d, enter the CRITICAL SECTION.", meService.getTimeStamp());
+                // to calculate execution time
+                long executionStart = System.currentTimeMillis();
+
+                MELogger.Info("LocalId: %d, TimeStamp: %d, enter the CRITICAL SECTION.", local.getId(), meService.getTimeStamp());
+
+                // to evaluate implementation correctness
+                MELogger.Debug("[ME_REPORT_TIMESTAMP] %d %d %s %d", meService.getTimeStamp(), local.getId(),local.getHost(),local.getPort());
 
                 Thread.sleep(getNext(randCS, csExecutionTimeMean));
+                MELogger.Debug("[ME_REPORT_EXECUTION] %d %d %d", local.getId(), requestsNum, System.currentTimeMillis() - executionStart);
 
                 meService.csLeave();
+
+
+                MELogger.Debug("[ME_REPORT_RESPONSE] %d %d %d", local.getId(), requestsNum, System.currentTimeMillis() - repsonseStart);
                 MELogger.Info("Leave CRITICAL SECTION.");
 
                 Thread.sleep(getNext(randWait, interRequestDelayMean));
 
                 requestsNum--;
+
+                if(meService.getTimeStamp() >= totalCSNum){
+                    MELogger.Debug("[ME_REPORT_APP] %d %d", local.getId(), System.currentTimeMillis() - appStart);
+                }
             }
+
         }catch (Exception e) {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
