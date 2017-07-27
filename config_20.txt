@@ -1,0 +1,30 @@
+
+# nodesNum interRequestDelayMean csExecutionTimeMean requestsNum
+  20        100                    100                 100
+
+# Here we list the individual nodes
+
+#
+# Format is:
+
+# NodeId Hostname Port  Holder
+  0      dc01     8010  0
+  1      dc02     8010  0
+  2      dc03     8010  0
+  3      dc04     8010  1
+  4      dc05     8010  1
+  5      dc06     8010  2
+  6      dc07     8010  2
+  7      dc08     8010  3
+  8      dc09     8010  3
+  9      dc10     8010  4
+  10     dc11     8010  4
+  11     dc12     8010  5
+  12     dc13     8010  5
+  13     dc14     8010  6 
+  14     dc15     8010  6
+  15     dc16     8010  7
+  16     dc17     8010  7
+  17     dc18     8010  8
+  18     dc19     8010  8
+  19     dc20     8010  9

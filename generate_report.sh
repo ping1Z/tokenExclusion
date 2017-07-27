@@ -10,11 +10,13 @@ PROJDIR=$HOME/cs6378/p2
 
 LOGDIR=$PROJDIR/logs
 
-EXDIR=$PROJDIR/logs
+EXDIR=$PROJDIR/report
+
+REPORT_PREFIX=5_2_3
 
 # Generate Timestamp Evaluation Report
 REPORT_HEADER="TIMESTAMP, ID, HOST, PORT"
-REPORT_NAME="eport_timestamp_evaluation.txt"
+REPORT_NAME=$EXDIR/$REPORT_PREFIX"report_timestamp_evaluation.txt"
 echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_TIMESTAMP' $LOGDIR/*.log |
 (
@@ -32,23 +34,23 @@ grep -E 'ME_REPORT_TIMESTAMP' $LOGDIR/*.log |
 
 # Generate Throughput Report
 REPORT_HEADER="ID, TIME"
-REPORT_NAME="report_throughput.txt"
+REPORT_NAME=$EXDIR/$REPORT_PREFIX"report_throughput.txt"
 echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_APP' $LOGDIR/*.log |
 (
     READ_NODE=0
-    while read line
+    while read line 
     do
 	id=$( echo $line | awk '{ print $5 }' )
     time=$( echo $line | awk '{ print $6 }' )
-
+	
 	echo $id, $time >> $REPORT_NAME
     done 
 )  
 
 # Generate Response Time Report
 REPORT_HEADER="ID, REQUEST_NUM, TIME"
-REPORT_NAME="report_responseTime.txt"
+REPORT_NAME=$EXDIR/$REPORT_PREFIX"report_responseTime.txt"
 echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_RESPONSE' $LOGDIR/*.log |
 (
@@ -65,7 +67,7 @@ grep -E 'ME_REPORT_RESPONSE' $LOGDIR/*.log |
 
 # Generate Execution Time Report
 REPORT_HEADER="ID, REQUEST_NUM, TIME"
-REPORT_NAME="report_executionTime.txt"
+REPORT_NAME=$EXDIR/$REPORT_PREFIX"report_executionTime.txt"
 echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_EXECUTION' $LOGDIR/*.log |
 (
@@ -82,7 +84,7 @@ grep -E 'ME_REPORT_EXECUTION' $LOGDIR/*.log |
 
 # Generate Message Complexity Report
 REPORT_HEADER="ID, CONTENT"
-REPORT_NAME="report_MessageComplexity.txt"
+REPORT_NAME=$EXDIR/$REPORT_PREFIX"report_MessageComplexity.txt"
 echo $REPORT_HEADER > $REPORT_NAME
 grep -E 'ME_REPORT_MSG' $LOGDIR/*.log |
 (

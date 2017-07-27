@@ -1,6 +1,6 @@
 
 # nodesNum interRequestDelayMean csExecutionTimeMean requestsNum
-  10        100                    100                 100
+  5        100                    100                 100
 
 # Here we list the individual nodes
 
@@ -12,10 +12,6 @@
   1      dc02     8010  0
   2      dc03     8010  0
   3      dc04     8010  1
-  4      dc05     8010  1
-  5      dc06     8010  2
-  6      dc07     8010  2
-  7      dc08     8010  3
-  8      dc09     8010  4
-  9      dc10     8010  5
+  4      dc05     8010  2
+
 
