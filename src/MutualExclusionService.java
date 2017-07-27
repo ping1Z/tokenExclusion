@@ -94,7 +94,8 @@ public class MutualExclusionService{
         MELogger.Debug("[ME_REPORT_MSG] %d %s", msg.getId(), msg.getContent());
 
         if (msg.getContent().equals("REQUEST")) {
-            queue.add(msg.getId());
+            //queue.add(msg.getId());
+            addToQueue(msg.getId(), false);
         } else {
             setTimeStamp(msg.getTimeStamp());
             holder = local;
@@ -106,7 +107,8 @@ public class MutualExclusionService{
     public void csEnter() throws Exception{
         MELogger.Info("Request %d", local.getId());
 
-        queue.addFirst(local.getId());
+        //queue.addFirst(local.getId());
+        addToQueue(local.getId(), false);
 
         assignToken();
         makeRequest();
@@ -114,6 +116,14 @@ public class MutualExclusionService{
         while(status != MEStatus.IN_CS){
 
             Thread.sleep(10);
+        }
+    }
+
+    public synchronized void addToQueue(int id, boolean addFirst){
+        if(addFirst){
+            queue.addFirst(id);
+        }else{
+            queue.addLast(id);
         }
     }
 
