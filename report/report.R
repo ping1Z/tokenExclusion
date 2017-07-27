@@ -97,3 +97,12 @@ ggplot(df_data, aes(fill=as.factor(df_data$Mode), y=df_data$Throughput, x=df_dat
 # Message Complexity
 ggplot(df_data, aes(fill=as.factor(df_data$Mode), y=df_data$MsgComplexity, x=df_data$NumOfNode)) + 
   geom_bar(position="dodge", stat="identity") + labs(x = "Num of Nodes", y = "Message Complexity per Request", fill="Mode")
+
+
+# Implementation Correctness
+df_ts = read.csv('./report/20_1_1report_timestamp_evaluation.txt', stringsAsFactors = FALSE)
+
+# Uniform color
+ggplot(df_ts, aes(x=df_ts$TIMESTAMP)) + 
+  geom_histogram(binwidth = 0.2, color=rgb(0.26, 0.95, 0.87), fill=rgb(0.2,0.7,0.1,0.4) ) +
+  labs(x = "Timstamp", y = "Count")
